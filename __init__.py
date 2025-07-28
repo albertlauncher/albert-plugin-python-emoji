@@ -16,7 +16,7 @@ md_version = "3.1"
 md_name = "Emoji"
 md_description = "Find and copy emojis by name"
 md_license = "MIT"
-md_url = "https://github.com/albertlauncher/python/tree/main/emoji"
+md_url = "https://github.com/albertlauncher/albert-plugin-python-emoji"
 md_authors = "@manuelschneid3r"
 
 
