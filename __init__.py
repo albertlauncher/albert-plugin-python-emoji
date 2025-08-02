@@ -18,6 +18,7 @@ md_description = "Find and copy emojis by name"
 md_license = "MIT"
 md_url = "https://github.com/albertlauncher/albert-plugin-python-emoji"
 md_authors = "@manuelschneid3r"
+md_maintainers = ["@manuelschneid3r"]
 
 
 class Plugin(PluginInstance, IndexQueryHandler):
