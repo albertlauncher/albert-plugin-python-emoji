@@ -11,7 +11,7 @@ from pathlib import Path
 
 from albert import *
 
-md_iid = "3.0"
+md_iid = "4.0"
 md_version = "3.2"
 md_name = "Emoji"
 md_description = "Find and copy emojis by name"
@@ -213,9 +213,9 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
             item = StandardItem(
                 id=emoji,
-                iconUrls=[f"gen:?text={emoji}"],
                 text=title,
                 subtext=", ".join(aliases),
+                iconFactory=lambda emo=emoji: makeGraphemeIcon(emo),
                 actions=actions
             )
 
