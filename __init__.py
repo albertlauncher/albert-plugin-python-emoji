@@ -190,7 +190,10 @@ class Plugin(PluginInstance, IndexQueryHandler):
                     continue
 
             title = ann['tts'][0]
-            aliases = remove_redundancy([title.replace(':', '').replace(',', ''), *ann['default']])
+            title = title[:1].upper() + title[1:]  # capitalize first letter
+            aliases = remove_redundancy([title.replace(':', '').replace(',', ''),
+                                         *[a[:1].upper() + a[1:] for a in ann['default']]])  # capitalize first letter
+            aliases = [a for a in aliases if a.lower() != title.lower()]  # remove title from aliases
 
             actions = []
             if havePasteSupport():
@@ -210,12 +213,13 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
             item = StandardItem(
                 id=emoji,
-                text=title.capitalize(),
-                subtext=", ".join([a.capitalize() for a in aliases]),
                 iconUrls=[f"gen:?text={emoji}"],
+                text=title,
+                subtext=", ".join(aliases),
                 actions=actions
             )
 
+            index_items.append(IndexItem(item=item, string=title))
             for alias in aliases:
                 index_items.append(IndexItem(item=item, string=alias))
 
