@@ -12,7 +12,7 @@ from pathlib import Path
 from albert import *
 
 md_iid = "4.0"
-md_version = "3.2"
+md_version = "3.2.1"
 md_name = "Emoji"
 md_description = "Find and copy emojis by name"
 md_license = "MIT"
