@@ -215,7 +215,7 @@ class Plugin(PluginInstance, IndexQueryHandler):
                 id=emoji,
                 text=title,
                 subtext=", ".join(aliases),
-                iconFactory=lambda emo=emoji: makeGraphemeIcon(emo),
+                icon_factory=lambda emo=emoji: makeGraphemeIcon(emo),
                 actions=actions
             )
 
