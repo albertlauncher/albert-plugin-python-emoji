@@ -126,7 +126,8 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
             # determine locale
 
-            if lang := getlocale()[0]:
+            lang = getlocale()[0]
+            if lang and lang != 'C':
                 lang = lang[0:2]
             else:
                 warning("Failed getting locale. There will be no localized emoji aliases.")
