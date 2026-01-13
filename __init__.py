@@ -6,7 +6,7 @@ import re
 import threading
 import urllib.request
 import builtins
-from locale import getdefaultlocale
+from locale import getlocale
 from pathlib import Path
 
 from albert import *
@@ -126,7 +126,8 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
             # determine locale
 
-            if lang := getdefaultlocale()[0]:
+            lang = getlocale()[0]
+            if lang and lang != 'C':
                 lang = lang[0:2]
             else:
                 warning("Failed getting locale. There will be no localized emoji aliases.")
