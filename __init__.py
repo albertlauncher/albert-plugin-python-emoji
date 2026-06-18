@@ -11,7 +11,7 @@ from pathlib import Path
 
 from albert import *
 
-md_iid = "5.0"
+md_iid = "6.0"
 md_version = "3.2.2"
 md_name = "Emoji"
 md_description = "Find and copy emojis by name"
