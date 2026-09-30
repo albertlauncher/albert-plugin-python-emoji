@@ -20,6 +20,22 @@ md_url = "https://github.com/albertlauncher/albert-plugin-python-emoji"
 md_authors = ["@ManuelSchneid3r"]
 md_maintainers = ["@BarrensZeppelin", "@ManuelSchneid3r", "@tomsquest"]
 
+SKIN_TONES = {
+    'All': None,
+    'None': '',
+    'Light': '\U0001F3FB',
+    'Medium-Light': '\U0001F3FC',
+    'Medium': '\U0001F3FD',
+    'Medium-Dark': '\U0001F3FE',
+    'Dark': '\U0001F3FF',
+}
+SKIN_TONE_MODIFIERS = frozenset(tone for tone in SKIN_TONES.values() if tone)
+
+
+def normalize_emoji(emoji: str) -> str:
+    return ''.join(char for char in emoji
+                   if char not in SKIN_TONE_MODIFIERS and char != '\uFE0F')
+
 class Plugin(PluginInstance, IndexQueryHandler):
 
     def __init__(self):
@@ -27,9 +43,9 @@ class Plugin(PluginInstance, IndexQueryHandler):
         IndexQueryHandler.__init__(self)
         self.thread = None
 
-        self._use_derived = self.readConfig('use_derived', bool)
-        if self._use_derived is None:
-            self._use_derived = False
+        self._skin_tone = self.readConfig('skin_tone', str)
+        if self._skin_tone not in SKIN_TONES:
+            self._skin_tone = 'All'
 
     def __del__(self):
         if self.thread and self.thread.is_alive():
@@ -39,21 +55,22 @@ class Plugin(PluginInstance, IndexQueryHandler):
         return ':'
 
     @property
-    def use_derived(self):
-        return self._use_derived
+    def skin_tone(self):
+        return self._skin_tone
 
-    @use_derived.setter
-    def use_derived(self, value):
-        self._use_derived = value
-        self.writeConfig('use_derived', value)
+    @skin_tone.setter
+    def skin_tone(self, value):
+        self._skin_tone = value
+        self.writeConfig('skin_tone', value)
         self.updateIndexItems()
 
     def configWidget(self):
         return [
             {
-                'type': 'checkbox',
-                'property': 'use_derived',
-                'label': 'Use derived emojis'
+                'type': 'combobox',
+                'property': 'skin_tone',
+                'label': 'Skin Tone',
+                'items': list(SKIN_TONES)
             }
         ]
 
@@ -122,7 +139,7 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
             return fully_qualified
 
-        def get_annotations(cache_path: Path, use_derived: bool) -> dict:
+        def get_annotations(cache_path: Path) -> dict:
 
             # determine locale
 
@@ -144,9 +161,6 @@ class Plugin(PluginInstance, IndexQueryHandler):
             with path_full.open("r", encoding='utf-8') as file_full:
                 json_full = json.load(file_full)['annotations']['annotations']
 
-            if not use_derived:
-                return json_full
-
             # fetch localized cldr annotations 'derived'
 
             path_derived = cache_path / f'emoji_annotations_derived_{lang}.json'
@@ -164,7 +178,13 @@ class Plugin(PluginInstance, IndexQueryHandler):
         cache_location = self.cacheLocation()
         cache_location.mkdir(parents=True, exist_ok=True)
         emojis = get_fully_qualified_emojis(cache_location)
-        annotations = get_annotations(cache_location, self.use_derived)
+        annotations = get_annotations(cache_location)
+        skin_tone = self.skin_tone
+        tone_capable = {
+            normalize_emoji(emoji)
+            for emoji in emojis
+            if any(modifier in emoji for modifier in SKIN_TONE_MODIFIERS)
+        }
 
         def remove_redundancy(sentences):
             sets_of_words = [set(sentence.lower().split()) for sentence in sentences]
@@ -180,6 +200,12 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
         index_items = []
         for emoji in emojis:
+            if normalize_emoji(emoji) in tone_capable:
+                if skin_tone == 'None' and any(modifier in emoji for modifier in SKIN_TONE_MODIFIERS):
+                    continue
+                if skin_tone not in ('All', 'None') and SKIN_TONES[skin_tone] not in emoji:
+                    continue
+
             try:
                 ann = annotations[emoji]
             except KeyError:
